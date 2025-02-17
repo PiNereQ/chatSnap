@@ -1,32 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:prezent_vica_final/views/chat_screen/chat_screen.dart';
+import 'package:prezent_vica_final/services/auth_service.dart';
+import 'package:prezent_vica_final/services/db_service.dart';
+import 'package:prezent_vica_final/widgets/chat_widget.dart';
 import 'package:prezent_vica_final/views/home_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prezent_vica_final/blocs/user_bloc.dart'; // Dodaj ten import
 import 'package:prezent_vica_final/models/user.dart';
 import 'package:prezent_vica_final/widgets/image_display_widget.dart';
 
+
 class LoginScreen extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  //Loggin user in
   Future<void> _loginUser(String email, String password, BuildContext context) async {
     try {
-      final UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
-      // Ustaw użytkownika w bloc
-      final user = UserModel(
-        uid: userCredential.user!.uid,
-        username: email.split('@')[0], // Przykładowa metoda do uzyskania nazwy użytkownika
-        email: email,
-      );
-
-      // Zaktualizuj UserBloc
-      BlocProvider.of<UserBloc>(context).setUser(user);
-
-      // Przejdź do ekranu głównego po zalogowaniu
-      Navigator.pushReplacementNamed(context, '/home');
+      AuthService().loginUser(email, password, context);
     } catch (e) {
-      // Wyświetl komunikat o błędzie
+      // Else print error
+      //TODO !!!
       final snackBar = SnackBar(content: Text('Logowanie nie powiodło się: ${e}'));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
@@ -36,12 +29,23 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Logsin'),
+        title: Text('Login Page'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // BlocBuilder<UserBloc, UserModel?>(
+            //   builder: (context, user) {
+            //     if (user == null) {
+            //       return Text('No user logged in.');
+            //     }
+            //     return Padding(
+            //       padding: const EdgeInsets.all(8.0),
+            //       child: Text('Welcome, ${user.username}'),
+            //     );
+            //   },
+            // ),
             ElevatedButton(
               onPressed: () => _loginUser('VicaPika@ex.com', 'dsajdbh783d728bdiba89g2d7a2dbuasd', context),
               child: Text('Jestem Vica!'),

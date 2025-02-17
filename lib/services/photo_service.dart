@@ -10,6 +10,7 @@ class PhotoService {
 
   // Funkcja do robienia zdjęcia i jego przesyłania do Firebase Storage
   Future<void> pickAndUploadImage() async {
+    final String senderId = _auth.currentUser!.uid;
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
@@ -18,11 +19,11 @@ class PhotoService {
       try {
         // Dodajemy metadane, aby wiedzieć, kto wysłał zdjęcie
         final metadata = SettableMetadata(customMetadata: {
-          'senderId': _auth.currentUser!.uid,
+          'senderId': senderId,
         });
 
         // Przesyłanie pliku do Firebase Storage
-        await _storage.ref('images/$fileName').putFile(imageFile, metadata);
+        await _storage.ref('images/$senderId/$fileName').putFile(imageFile, metadata);
       } catch (e) {
         print(e.toString());
       }

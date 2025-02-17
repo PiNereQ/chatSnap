@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prezent_vica_final/blocs/user_bloc.dart';
 import 'package:prezent_vica_final/services/api_service.dart';
+import 'package:prezent_vica_final/services/auth_service.dart';
+import 'package:prezent_vica_final/services/db_service.dart';
 import 'package:prezent_vica_final/services/image_api_service.dart'; // Importuj nowy serwis do obrazów
+import 'package:prezent_vica_final/widgets/loading_dog_on_chat_appbar.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatWidget extends StatefulWidget {
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  _ChatWidgetState createState() => _ChatWidgetState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatWidgetState extends State<ChatWidget> {
+
   final ApiService _apiService = ApiService();
-  final ImageApiService _imageApiService = ImageApiService(); // Nowa instancja serwisu do obrazów
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   final TextEditingController _controller = TextEditingController();
   User? _currentUser;
   late ScrollController _scrollController; // Dodany kontroler przewijania
@@ -19,7 +23,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _currentUser = _auth.currentUser; // Ustawienie aktualnie zalogowanego użytkownika
+    _currentUser = AuthService().getAuth().currentUser; // Ustawienie aktualnie zalogowanego użytkownika
     _scrollController = ScrollController(); // Inicjalizacja kontrolera przewijania
   }
 
@@ -34,17 +38,9 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //resizeToAvoidBottomInset: true, // Pozwala na automatyczne podnoszenie ekranu przy otwarciu klawiatury
       appBar: AppBar(
         title: Text('Chat'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await _auth.signOut();
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-          ),
-        ],
         backgroundColor: Colors.transparent,
       ),
       body: Container(
@@ -139,6 +135,14 @@ class _ChatScreenState extends State<ChatScreen> {
                       textCapitalization: TextCapitalization.sentences,
                       decoration: InputDecoration(hintText: 'Buziaki :*'),
                       style: TextStyle(color: Colors.white),
+                      // Dodaj focus listener, aby przesunąć widok przy otwieraniu klawiatury
+                      onTap: () {
+                        _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      },
                     ),
                   ),
                   IconButton(
